@@ -1,12 +1,19 @@
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import cors from "cors"
 import studentRoutes from "./routes/studentRoutes.js";
 import authRoutes from "./routes/authRoutes.js"; // for login/register APIs
 import { verifyToken } from "./middleware/auth.js"; // import middleware
 
 dotenv.config();
 const app = express();
+
+app.use(cors({
+    origin: "*", // allow all origins OR replace * with your frontend URL
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+}));
 app.use(express.json());
 
 // DB connection
