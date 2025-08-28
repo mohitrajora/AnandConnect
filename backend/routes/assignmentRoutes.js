@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import { verifyToken, isFaculty } from "../middleware/auth.js";
-import { createAssignment, getAssignments, deleteAssignment } from "../controllers/assignmentController.js";
+import { createAssignment, getAssignments, deleteAssignment } from "../controller/assignmentController.js";
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Routes
-router.post("/", verifyToken, isFaculty, upload.single("image"), createAssignment);
+router.post("/create", verifyToken, isFaculty, upload.single("image"), createAssignment);
 router.get("/", verifyToken, getAssignments);
 router.delete("/:id", verifyToken, isFaculty, deleteAssignment);
 
