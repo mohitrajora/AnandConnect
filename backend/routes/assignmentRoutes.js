@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Routes
-router.post("/create", verifyToken, isFaculty, upload.single("image"), createAssignment);
+router.post("/create", verifyToken, isFaculty, upload.single("assignmentFile"), createAssignment);
 router.get("/", verifyToken, getAssignments);
 router.delete("/:id", verifyToken, isFaculty, deleteAssignment);
 
