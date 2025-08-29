@@ -3,15 +3,15 @@ import Student from "../models/studentModel.js";
 // CREATE a new student
 export const createStudent = async (req, res) => {
     try {
-        const { name, email, collegeId, course, year } = req.body;
+        const { name, email, password, enrollment, phone, course } = req.body;
 
-        // Check if collegeId already exists
-        const existingStudent = await Student.findOne({ collegeId });
+        // Check if enrollment already exists
+        const existingStudent = await Student.findOne({ enrollment });
         if (existingStudent) {
-            return res.status(400).json({ message: "College ID already exists!" });
+            return res.status(400).json({ message: "Enrollment already exists!" });
         }
 
-        const student = new Student({ name, email, collegeId, course, year });
+        const student = new Student({ name, email, password, enrollment, phone, course });
         await student.save();
 
         res.status(201).json({ message: "Student created successfully", student });
@@ -30,10 +30,10 @@ export const getStudents = async (req, res) => {
     }
 };
 
-// GET single student by collegeId instead of _id
-export const getStudentByCollegeId = async (req, res) => {
+// GET single student by enrollment instead of collegeId
+export const getStudentByEnrollment = async (req, res) => {
     try {
-        const student = await Student.findOne({ collegeId: req.params.collegeId });
+        const student = await Student.findOne({ enrollment: req.params.enrollment });
         if (!student) return res.status(404).json({ message: "Student not found" });
 
         res.status(200).json(student);
@@ -42,11 +42,11 @@ export const getStudentByCollegeId = async (req, res) => {
     }
 };
 
-// UPDATE student by collegeId instead of _id
-export const updateStudentByCollegeId = async (req, res) => {
+// UPDATE student by enrollment
+export const updateStudentByEnrollment = async (req, res) => {
     try {
         const student = await Student.findOneAndUpdate(
-            { collegeId: req.params.collegeId },
+            { enrollment: req.params.enrollment },
             req.body,
             { new: true }
         );
@@ -58,10 +58,10 @@ export const updateStudentByCollegeId = async (req, res) => {
     }
 };
 
-// DELETE student by collegeId instead of _id
-export const deleteStudentByCollegeId = async (req, res) => {
+// DELETE student by enrollment
+export const deleteStudentByEnrollment = async (req, res) => {
     try {
-        const student = await Student.findOneAndDelete({ collegeId: req.params.collegeId });
+        const student = await Student.findOneAndDelete({ enrollment: req.params.enrollment });
         if (!student) return res.status(404).json({ message: "Student not found" });
 
         res.status(200).json({ message: "Student deleted successfully" });
