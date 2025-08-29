@@ -10,7 +10,7 @@ import { isAdmin, verifyToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.post("/create", verifyToken, isAdmin, createStudent);
+router.post("/create-student", verifyToken, isAdmin, createStudent);
 router.get("/", verifyToken, (req, res, next) => {
     if (req.user.role === "admin" || req.user.role === "faculty") {
         next();
