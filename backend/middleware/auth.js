@@ -33,3 +33,6 @@ export const isFaculty = (req, res, next) => {
     }
     next();
 };
+
+// ✅ Default export for convenience
+export default verifyToken;

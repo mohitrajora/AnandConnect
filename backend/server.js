@@ -6,6 +6,7 @@ import studentRoutes from "./routes/studentRoutes.js";
 import authRoutes from "./routes/authRoutes.js"; // for login/register APIs
 import { verifyToken } from "./middleware/auth.js"; // import middleware
 import assignmentRoutes from "./routes/assignmentRoutes.js";
+import facultyRoutes from "./routes/facultyRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -27,7 +28,7 @@ app.use("/auth", authRoutes);
 
 // Protected routes
 app.use("/students", verifyToken, studentRoutes);
-
+app.use("/faculty", facultyRoutes);
 app.use("/assignments", assignmentRoutes);
 app.use("/uploads", express.static("uploads")); // serve images
 
