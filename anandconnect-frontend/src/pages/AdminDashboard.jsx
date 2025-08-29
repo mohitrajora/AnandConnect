@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Users, GraduationCap, LayoutDashboard, LogOut, UserPlus } from "lucide-react"; // Lucide icons
-import AdminSidebar from "../components/AdminSidebar"; // We'll upgrade this too
+import { Users, GraduationCap, LayoutDashboard, LogOut, UserPlus } from "lucide-react";
+import AdminSidebar from "../components/AdminSidebar";
 import UserTable from "../components/UserTable";
 import AddUserModal from "../components/AddUserModal";
 
@@ -14,9 +14,10 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         fetchData();
+        fetchFaculty();
     }, []);
 
-    // 👉 Add Student Function
+    // 👉 Add Student
     const addStudent = async (studentData) => {
         try {
             const token = localStorage.getItem("token");
@@ -25,7 +26,7 @@ export default function AdminDashboard() {
                 return;
             }
 
-            const res = await fetch("https://anandconnect.onrender.com/students/create", {
+            const res = await fetch("https://anandconnect.onrender.com/students/create-student", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -35,16 +36,64 @@ export default function AdminDashboard() {
             });
 
             const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to add student");
 
-            if (!res.ok) {
-                throw new Error(data.message || "Failed to add student");
-            }
-
-            // ✅ Success
             setPopup({ show: true, message: "Student added successfully!", success: true, fadingOut: false });
-            fetchData(); // refresh list
+            fetchData();
         } catch (err) {
             setPopup({ show: true, message: err.message || "Failed to add student", success: false, fadingOut: false });
+        }
+    };
+
+    // 👉 Add Faculty
+    const addFaculty = async (facultyData) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setPopup({ show: true, message: "No token found! Please login again.", success: false, fadingOut: false });
+                return;
+            }
+
+            const res = await fetch("https://anandconnect.onrender.com/faculty/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(facultyData),
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to add faculty");
+
+            setPopup({ show: true, message: "Faculty added successfully!", success: true, fadingOut: false });
+            fetchData();
+        } catch (err) {
+            setPopup({ show: true, message: err.message || "Failed to add faculty", success: false, fadingOut: false });
+        }
+    };
+
+    // 👉 Remove Student by enrollment
+    const removeStudent = async (enrollment) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setPopup({ show: true, message: "No token found! Please login again.", success: false, fadingOut: false });
+                return;
+            }
+
+            const res = await fetch(`https://anandconnect.onrender.com/students/${enrollment}`, {
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to delete student");
+
+            setPopup({ show: true, message: "Student deleted successfully!", success: true, fadingOut: false });
+            fetchData();
+        } catch (err) {
+            setPopup({ show: true, message: err.message || "Error deleting student", success: false, fadingOut: false });
         }
     };
 
@@ -72,7 +121,6 @@ export default function AdminDashboard() {
 
             const data = await res.json();
             setStudents(data || []);
-            setFaculties(data || []);
         } catch (err) {
             setPopup({ show: true, message: err.message || "Failed to load data", success: false, fadingOut: false });
         } finally {
@@ -80,34 +128,50 @@ export default function AdminDashboard() {
         }
     };
 
+    // For Faculty
+    const fetchFaculty = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setPopup({ show: true, message: "No token found! Please login again.", success: false, fadingOut: false });
+                setLoading(false);
+                return;
+            }
+
+            const res = await fetch("https://anandconnect.onrender.com/faculty", {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.message || "Failed to fetch faculty data");
+            }
+
+            const data = await res.json();
+            setFaculties(data || []);   // ✅ fixed setter
+        } catch (err) {
+            setPopup({ show: true, message: err.message || "Failed to load faculty data", success: false, fadingOut: false });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="flex min-h-screen bg-gradient-to-br from-primary to-secondary text-gray-900">
-            {/* Stylish Sidebar */}
+            {/* Sidebar */}
             <div className="w-64 bg-white shadow-xl flex flex-col justify-between">
                 <div>
                     <div className="p-6 text-center text-2xl font-bold text-primary border-b">
                         Admin Panel
                     </div>
                     <nav className="mt-4">
-                        <SidebarItem
-                            icon={<LayoutDashboard />}
-                            label="Dashboard"
-                            active={activeTab === "dashboard"}
-                            onClick={() => setActiveTab("dashboard")}
-                        />
-                        <SidebarItem
-                            icon={<GraduationCap />}
-                            label="Students"
-                            active={activeTab === "students"}
-                            onClick={() => setActiveTab("students")}
-                        />
-                        <SidebarItem
-                            icon={<Users />}
-                            label="Faculties"
-                            active={activeTab === "faculties"}
-                            onClick={() => setActiveTab("faculties")}
-                        />
+                        <SidebarItem icon={<LayoutDashboard />} label="Dashboard" active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")} />
+                        <SidebarItem icon={<GraduationCap />} label="Students" active={activeTab === "students"} onClick={() => setActiveTab("students")} />
+                        <SidebarItem icon={<Users />} label="Faculties" active={activeTab === "faculties"} onClick={() => setActiveTab("faculties")} />
                     </nav>
                 </div>
                 <div className="absolute top-4 right-4">
@@ -122,7 +186,6 @@ export default function AdminDashboard() {
 
             {/* Main Content */}
             <div className="flex-1 p-6 overflow-y-auto">
-                {/* Dashboard */}
                 {activeTab === "dashboard" && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <DashboardCard title="Students" count={students.length} color="bg-blue-500" icon={<GraduationCap />} />
@@ -130,14 +193,11 @@ export default function AdminDashboard() {
                     </div>
                 )}
 
-                {/* Students Table */}
                 {["students", "faculties"].map(tab => (
                     activeTab === tab && (
                         <div key={tab} className="space-y-4">
                             <div className="flex justify-between items-center">
-                                <h2 className="text-2xl font-bold">
-                                    {tab === "students" ? "Students" : "Faculties"}
-                                </h2>
+                                <h2 className="text-2xl font-bold">{tab === "students" ? "Students" : "Faculties"}</h2>
                                 <button
                                     className="flex items-center gap-2 bg-primary hover:bg-secondary text-white px-4 py-2 rounded-lg transition"
                                     onClick={() => setShowModal(true)}
@@ -149,30 +209,28 @@ export default function AdminDashboard() {
                             <UserTable
                                 users={tab === "students" ? students : faculties}
                                 role={tab === "students" ? "student" : "faculty"}
-                                refresh={fetchData}
+                                refresh={tab === "students" ? fetchData : fetchFaculty}   // ✅ refresh correct list
                                 setPopup={setPopup}
+                                onRemove={tab === "students" ? removeStudent : undefined}
                             />
                         </div>
                     )
                 ))}
-
             </div>
 
-            {/* Add User Modal */}
             {showModal && (
                 <AddUserModal
                     role={activeTab === "students" ? "student" : "faculty"}
                     onClose={() => setShowModal(false)}
-                    refresh={fetchData}
+                    refresh={activeTab === "students" ? fetchData : fetchFaculty}   // ✅ reload correct
                     setPopup={setPopup}
                 />
             )}
-
         </div>
     );
 }
 
-/* --- SidebarItem Component --- */
+/* SidebarItem */
 function SidebarItem({ icon, label, active, onClick }) {
     return (
         <button
@@ -185,7 +243,7 @@ function SidebarItem({ icon, label, active, onClick }) {
     );
 }
 
-/* --- Dashboard Card --- */
+/* Dashboard Card */
 function DashboardCard({ title, count, color, icon }) {
     return (
         <div className={`${color} text-white p-6 rounded-xl shadow-xl flex items-center justify-between transform hover:scale-105 transition`}>

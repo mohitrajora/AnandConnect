@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import FacultyDashboard from "./pages/FacultyDashboard";
+import { Toaster } from "react-hot-toast";
 
 export default function App() {
   return (
@@ -25,7 +26,9 @@ export default function App() {
             <Route path="/faculty-dashboard" element={<FacultyDashboard />} />
           </Routes>
         </main>
+        <Toaster position="top-right" reverseOrder={false} />
       </div>
     </Router>
+
   );
 }

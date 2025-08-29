@@ -24,7 +24,7 @@ export default function AddUserModal({ role, onClose, refresh, setPopup }) {
             let payload = {};
 
             if (role === "student") {
-                url = "http://localhost:5000/api/students/add";
+                url = "https://anandconnect.onrender.com/students/create-student";
                 payload = {
                     name: formData.name,
                     email: formData.email,
@@ -34,7 +34,7 @@ export default function AddUserModal({ role, onClose, refresh, setPopup }) {
                     course: formData.course,
                 };
             } else {
-                url = "http://localhost:5000/api/faculty/add";
+                url = "https://anandconnect.onrender.com/faculty/create";
                 payload = {
                     name: formData.name,
                     email: formData.email,
@@ -43,13 +43,26 @@ export default function AddUserModal({ role, onClose, refresh, setPopup }) {
                 };
             }
 
+            const token = localStorage.getItem("token"); // 👈 Get token
+            if (!token) {
+                setPopup({ type: "error", message: "No token found. Please login again." });
+                return;
+            }
+
             const res = await fetch(url, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}` // 👈 Send token
+                },
                 body: JSON.stringify(payload),
             });
 
-            if (!res.ok) throw new Error("Failed to add user");
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.message || "Failed to add user");
+            }
+
             setPopup({ type: "success", message: `${role} added successfully!` });
             refresh();
             onClose();
